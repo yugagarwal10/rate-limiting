@@ -17,6 +17,15 @@ Ensure MongoDB is running locally on port `27017`.
 ### Step 2: Start Backend
 ```bash
 cd backend
+
+## Environment Variables
+
+Create a `.env` file in the backend directory and add the following:
+
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/rate-limiter
+```
 npm install
 npm run dev
 ```
