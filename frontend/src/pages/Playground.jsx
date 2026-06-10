@@ -10,9 +10,9 @@ const Playground = ({ defaultApiKey }) => {
   const [status, setStatus] = useState(null);
   const [statusText, setStatusText] = useState('');
   const [limits, setLimits] = useState({
-    ipLimit: 10,
-    ipRemaining: 10,
-    ipReset: null,
+    apiKeyLimit: 10,
+    apiKeyRemaining: 10,
+    apiKeyReset: null,
   });
 
   useEffect(() => {
@@ -43,14 +43,14 @@ const Playground = ({ defaultApiKey }) => {
       setResponse(res.data);
       
       // Capture headers
-      const ipLimit = res.headers['x-ratelimit-limit-ip'];
-      const ipRemaining = res.headers['x-ratelimit-remaining-ip'];
-      const ipReset = res.headers['x-ratelimit-reset-ip'];
+      const apiLimit = res.headers['x-ratelimit-limit-apikey'];
+      const apiRemaining = res.headers['x-ratelimit-remaining-apikey'];
+      const apiReset = res.headers['x-ratelimit-reset-apikey'];
 
       setLimits({
-        ipLimit: ipLimit ? parseInt(ipLimit) : 10,
-        ipRemaining: ipRemaining ? parseInt(ipRemaining) : 0,
-        ipReset: ipReset ? parseInt(ipReset) : null,
+        apiKeyLimit: apiLimit ? parseInt(apiLimit) : 10,
+        apiKeyRemaining: apiRemaining ? parseInt(apiRemaining) : 0,
+        apiKeyReset: apiReset ? parseInt(apiReset) : null,
       });
 
       // Update response headers
@@ -64,14 +64,14 @@ const Playground = ({ defaultApiKey }) => {
         setResponse(errorResponse.data);
         setHeaders(errorResponse.headers);
 
-        const ipLimit = errorResponse.headers['x-ratelimit-limit-ip'];
-        const ipRemaining = errorResponse.headers['x-ratelimit-remaining-ip'];
-        const ipReset = errorResponse.headers['x-ratelimit-reset-ip'];
+        const apiLimit = errorResponse.headers['x-ratelimit-limit-apikey'];
+        const apiRemaining = errorResponse.headers['x-ratelimit-remaining-apikey'];
+        const apiReset = errorResponse.headers['x-ratelimit-reset-apikey'];
 
         setLimits({
-          ipLimit: ipLimit ? parseInt(ipLimit) : 10,
-          ipRemaining: ipRemaining ? parseInt(ipRemaining) : 0,
-          ipReset: ipReset ? parseInt(ipReset) : null,
+          apiKeyLimit: apiLimit ? parseInt(apiLimit) : 10,
+          apiKeyRemaining: apiRemaining ? parseInt(apiRemaining) : 0,
+          apiKeyReset: apiReset ? parseInt(apiReset) : null,
         });
       } else {
         // Network errors
@@ -105,7 +105,7 @@ const Playground = ({ defaultApiKey }) => {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-slate-100">API Playground</h1>
-          <p className="text-slate-400 text-xs mt-0.5">Test the API Key validation and observe the IP-based rate limiter (10 requests per 3 minutes).</p>
+          <p className="text-slate-400 text-xs mt-0.5">Test API Key validation and observe the Key-based rate limiter (10 requests per 3 minutes per API Key).</p>
         </div>
       </div>
 
@@ -170,27 +170,31 @@ const Playground = ({ defaultApiKey }) => {
               Rate Limit Status
             </h2>
 
-            {/* IP Box */}
+            {/* API Key Box */}
             <div className="p-5 bg-slate-900/30 border border-slate-800/80 rounded-xl space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">IP-Based Quota (3 Mins)</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">API Key Quota (3 Mins)</span>
                 <span className="text-xs font-semibold text-indigo-400">Limit: 10 reqs</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold font-mono text-slate-100">{limits.ipRemaining}</span>
-                <span className="text-xs text-slate-500">/ {limits.ipLimit} remaining</span>
+                <span className="text-3xl font-extrabold font-mono text-slate-100">{limits.apiKeyRemaining}</span>
+                <span className="text-xs text-slate-500">/ {limits.apiKeyLimit} remaining</span>
               </div>
               <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-1">
                 <div
                   className={`h-full transition-all duration-300 ${
-                    limits.ipRemaining <= 2 
+                    limits.apiKeyRemaining <= 2 
                       ? 'bg-rose-500' 
-                      : limits.ipRemaining <= 5 
+                      : limits.apiKeyRemaining <= 5 
                       ? 'bg-amber-500' 
                       : 'bg-indigo-500'
                   }`}
-                  style={{ width: `${(limits.ipRemaining / limits.ipLimit) * 100}%` }}
+                  style={{ width: `${(limits.apiKeyRemaining / limits.apiKeyLimit) * 100}%` }}
                 />
+              </div>
+              <div className="text-[10px] text-slate-500 pt-1.5 flex justify-between">
+                <span>Resets in: {limits.apiKeyReset !== null ? `${limits.apiKeyReset}s` : '60s'}</span>
+                <span>Enforced per API Key</span>
               </div>
             </div>
           </div>
@@ -237,13 +241,13 @@ const Playground = ({ defaultApiKey }) => {
                       <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">Rate Limiting Response Headers</span>
                       <div className="grid grid-cols-3 gap-2 font-mono text-[10px] bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80">
                         <div>
-                          <span className="text-slate-500">X-RateLimit-Limit-Ip:</span> <span className="text-emerald-400">{headers['x-ratelimit-limit-ip'] || 'N/A'}</span>
+                          <span className="text-slate-500">X-RateLimit-Limit-ApiKey:</span> <span className="text-emerald-400">{headers['x-ratelimit-limit-apikey'] || 'N/A'}</span>
                         </div>
                         <div>
-                          <span className="text-slate-500">X-RateLimit-Remaining-Ip:</span> <span className="text-emerald-400">{headers['x-ratelimit-remaining-ip'] || 'N/A'}</span>
+                          <span className="text-slate-500">X-RateLimit-Remaining-ApiKey:</span> <span className="text-emerald-400">{headers['x-ratelimit-remaining-apikey'] || 'N/A'}</span>
                         </div>
                         <div>
-                          <span className="text-slate-500">X-RateLimit-Reset-Ip:</span> <span className="text-emerald-400">{headers['x-ratelimit-reset-ip'] || 'N/A'}s</span>
+                          <span className="text-slate-500">X-RateLimit-Reset-ApiKey:</span> <span className="text-emerald-400">{headers['x-ratelimit-reset-apikey'] || 'N/A'}s</span>
                         </div>
                       </div>
                     </div>

@@ -187,7 +187,6 @@ const KeyGeneration = ({ onSelectKey }) => {
                   <th className="py-4 px-4">Name</th>
                   <th className="py-4 px-4">API Key Preview</th>
                   <th className="py-4 px-4">Created At</th>
-                  <th className="py-4 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50 text-sm">
@@ -199,27 +198,6 @@ const KeyGeneration = ({ onSelectKey }) => {
                     </td>
                     <td className="py-4 px-4 text-slate-500">
                       {new Date(key.createdAt).toLocaleString()}
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => copyToClipboard(key.apiKey)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 rounded transition-all cursor-pointer"
-                          title="Copy Full Key"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            localStorage.setItem('last_api_key', key.apiKey);
-                            if (onSelectKey) onSelectKey(key.apiKey);
-                            // Highlight or notify the user
-                          }}
-                          className="px-2.5 py-1 text-xs font-medium text-indigo-400 hover:text-white bg-indigo-500/10 hover:bg-indigo-600 rounded transition-all cursor-pointer"
-                        >
-                          Use Key
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))}

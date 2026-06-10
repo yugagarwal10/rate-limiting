@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
-const ipRateLimitSchema = new mongoose.Schema({
-  ip: {
+const apiKeyRateLimitSchema = new mongoose.Schema({
+  apiKey: {
     type: String,
     required: true,
     index: true,
@@ -19,4 +19,4 @@ const ipRateLimitSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('IpRateLimit', ipRateLimitSchema);
+module.exports = mongoose.model('ApiKeyRateLimit', apiKeyRateLimitSchema);

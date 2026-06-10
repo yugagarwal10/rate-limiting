@@ -89,7 +89,7 @@ const Dashboard = ({ defaultApiKey }) => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-100 font-display">System Dashboard</h1>
-            <p className="text-slate-400 text-xs mt-0.5">Real-time visualization of TTL indexes and IP quotas in MongoDB.</p>
+            <p className="text-slate-400 text-xs mt-0.5">Real-time visualization of TTL indexes and API Key quotas in MongoDB.</p>
           </div>
         </div>
 
@@ -141,15 +141,15 @@ const Dashboard = ({ defaultApiKey }) => {
       {stats ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* IP Quota Card */}
+          {/* API Key Quota Card */}
           <div className="glass-panel rounded-2xl p-6 relative overflow-hidden shadow-xl flex flex-col justify-between min-h-[185px]">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
             
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
-                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">IP Rate Limit (3 Mins)</span>
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">API Key Rate Limit (3 Mins)</span>
                 <h3 className="text-lg font-bold font-mono text-slate-200 select-all">
-                  {stats.ipStats.ip}
+                  {stats.apiKey ? `${stats.apiKey.apiKey.substring(0, 18)}...` : 'No Active Key'}
                 </h3>
               </div>
               <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
@@ -160,7 +160,7 @@ const Dashboard = ({ defaultApiKey }) => {
             <div className="space-y-4">
               <div className="flex justify-between items-baseline">
                 <div className="text-3xl font-extrabold font-mono text-slate-100">
-                  {stats.ipStats.remaining}
+                  {stats.apiKey ? stats.apiKeyStats.remaining : 10}
                   <span className="text-sm font-normal text-slate-500 font-sans ml-1">left</span>
                 </div>
                 <span className="text-xs text-slate-400">Limit: 10 reqs / 3 mins</span>
@@ -170,16 +170,16 @@ const Dashboard = ({ defaultApiKey }) => {
                 <div className="w-full bg-slate-850 h-2 rounded-full overflow-hidden">
                   <div 
                     className={`h-full transition-all duration-300 rounded-full ${
-                      stats.ipStats.remaining <= 2 ? 'bg-rose-500' : stats.ipStats.remaining <= 5 ? 'bg-amber-500' : 'bg-indigo-500'
+                      (stats.apiKey ? stats.apiKeyStats.remaining : 10) <= 2 ? 'bg-rose-500' : (stats.apiKey ? stats.apiKeyStats.remaining : 10) <= 5 ? 'bg-amber-500' : 'bg-indigo-500'
                     }`} 
-                    style={{ width: `${(stats.ipStats.remaining / 10) * 100}%` }}
+                    style={{ width: `${((stats.apiKey ? stats.apiKeyStats.remaining : 10) / 10) * 100}%` }}
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-500 pt-1">
-                  <span>{stats.ipStats.used} requests used</span>
+                  <span>{stats.apiKey ? stats.apiKeyStats.used : 0} requests used</span>
                   <span className="flex items-center gap-1 font-mono">
                     <Clock className="w-3.5 h-3.5" />
-                    Resets in: {stats.ipStats.resetTimer}s
+                    Resets in: {stats.apiKey ? stats.apiKeyStats.resetTimer : 180}s
                   </span>
                 </div>
               </div>
@@ -209,7 +209,7 @@ const Dashboard = ({ defaultApiKey }) => {
                   <span className="text-indigo-400 font-semibold">Enabled (180s)</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Active IP tracking:</span>
+                  <span>Active Key tracking:</span>
                   <span className="text-slate-200 font-mono font-semibold">Enabled</span>
                 </div>
                 <div className="flex justify-between">
@@ -223,7 +223,7 @@ const Dashboard = ({ defaultApiKey }) => {
 
               <div className="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[10px] text-slate-500 font-mono">
                 <span>TTL Target:</span>
-                <span className="text-slate-400">ip_rate_limits (createdAt)</span>
+                <span className="text-slate-400">api_key_rate_limits (createdAt)</span>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-# Step-by-Step Test Guide: IP-Based Rate Limiting System
+# Step-by-Step Test Guide: API Key Rate Limiting System
 
 Follow these instructions to run the project and verify all functionalities.
 
@@ -34,60 +34,58 @@ npm run dev
 
 ## 2. Step-by-Step Testing Procedure & Expected Outcomes
 
-### Step 1: Create an API Key (Homepage)
+### Step 1: Create API Key A and API Key B (Homepage)
 1. Open your browser and navigate to `http://localhost:5173`.
-2. Locate the **Generate a New Key** card.
-3. In the **API Key Name** field, type `Demo Key` and click the **Generate API Key** button.
+2. In the **API Key Name** field, type `Key A` and click the **Generate API Key** button.
+3. Once generated, copy this key (e.g. `sk_live_key_A...`).
+4. Again, in the **API Key Name** field, type `Key B` and click the **Generate API Key** button.
+5. Copy this second key (e.g. `sk_live_key_B...`).
 - **Expected Outcome**:
-  - A green container appears showing: `✓ Key Generated Successfully`.
-  - Your secure API key (prefixed with `sk_live_...`) is displayed.
-  - Click the **Copy** button to copy it.
-  - The key is added to the **Active Credentials** list below.
-  - **DB Check**: A new document is created in the `api_keys` collection containing `{ name: "Demo Key", apiKey: "sk_live_..." }`.
+  - Both keys appear in the **Active Credentials** list.
+  - **DB Check**: Two documents are created in the `api_keys` collection.
 
-### Step 2: Test API Requests (API Playground Page)
+### Step 2: Test API Key A Requests (API Playground Page)
 1. Click the **Playground** tab in the top navigation bar.
-2. The **X-API-KEY HEADER** input field will automatically be prefilled with your copied key.
+2. In the **X-API-KEY HEADER** input field, paste the copied **Key A** string.
 3. Click the blue **Send Request** button once.
 - **Expected Outcome**:
   - A green badge appears showing `200 OK`.
-  - The Response Body prints the JSON output: `"message": "API Request Successful!"`, server latency, key name (`Demo Key`), and client IP.
-  - The **Rate Limit Status** (IP-Based Quota) ticks down from `10/10` to `9/10`.
+  - The Response Body prints the successful JSON response.
+  - The **Rate Limit Status** (API Key Quota) ticks down from `10/10` to `9/10`.
 
-### Step 3: Trigger IP Rate Limiting (10 Req / 3 Mins)
-1. Rapidly click the **Send Request** button 11 times in under 3 minutes.
+### Step 3: Trigger API Key Rate Limiting on Key A
+1. Rapidly click the **Send Request** button 11 times.
 - **Expected Outcome**:
-  - For the first 10 requests, you will receive `200 OK` as the remaining count decreases to `0/10`.
   - On the **11th click**, the status badge turns red showing `429 Too Many Requests`.
   - The Response Body displays:
     ```json
     {
       "success": false,
-      "message": "IP rate limit exceeded"
+      "message": "API Key rate limit exceeded"
     }
     ```
-  - The card displays: `Resets in X seconds` (counting down from a maximum of 180 seconds).
-  - **DB Check**: An entry in `ip_rate_limits` is updated with `count: 11`.
+  - The rate limit panel displays: `Resets in X seconds` (counting down from 180s).
+  - **DB Check**: An entry in `api_key_rate_limits` is updated with `count: 11` for Key A.
 
-### Step 4: Verify Quota Reset
-1. Stop clicking. Wait for the reset timer to count down to `0` seconds.
-2. Click **Send Request** again.
+### Step 4: Verify Key B remains Active (Independent Quotas)
+1. Delete the Key A string from the **X-API-KEY HEADER** input.
+2. Paste the **Key B** string and click **Send Request** once.
 - **Expected Outcome**:
-  - The request succeeds again and returns `200 OK`.
-  - Your remaining quota resets back to `9/10`.
-  - **DB Check**: The document in `ip_rate_limits` is deleted automatically by the hybrid cleanup logic, and a fresh request cycle begins.
+  - The request succeeds immediately returning `200 OK`!
+  - The **Rate Limit Status** updates to show `9/10` remaining for Key B.
+  - This proves that **Key B is completely unaffected by the rate limiting on Key A**, confirming that quotas are isolated per API key.
 
-### Step 5: Test Auth Failures
-1. Delete the API key from the **X-API-KEY HEADER** input field (leave it blank).
-2. Click **Send Request** once.
+### Step 5: Verify Quota Reset
+1. Go back and select **Key A** (paste Key A string in the input field).
+2. Wait for the reset timer to count down and reach `0` seconds.
+3. Click **Send Request** again.
 - **Expected Outcome**:
-  - The response badge shows `401 Unauthorized` and the body says: `{"success": false, "message": "Invalid API Key"}`.
+  - The request succeeds with `200 OK`.
+  - **DB Check**: Key A's rate limit document is deleted automatically by our hybrid cleanup logic, resetting Key A's quota.
 
 ### Step 6: Monitor Live Metrics (Usage Dashboard Page)
 1. Click the **Dashboard** tab in the top navigation bar.
-2. Select `Demo Key` from the **ACTIVE KEY** dropdown menu.
-3. Ensure the **Auto-poll (3s)** checkbox is checked.
+2. Select `Key A` or `Key B` from the **ACTIVE KEY** dropdown menu.
+3. Toggle **Auto-poll (3s)**.
 - **Expected Outcome**:
-  - The dashboard updates every 3 seconds.
-  - The **IP Rate Limit (3 Mins)** card displays your real-time active IP usage, remaining requests, and countdown.
-  - The active selected API Key is monitored on the right metadata card.
+  - The **API Key Rate Limit (3 Mins)** card displays the real-time active quota details and reset countdown specifically for the selected key.
